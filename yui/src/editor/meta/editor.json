@@ -1,0 +1,7 @@
+{
+  "moodle-editor_webvi-editor": {
+    "requires": [
+        "node"
+      ]
+  }
+}

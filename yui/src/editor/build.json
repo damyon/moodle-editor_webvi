@@ -1,0 +1,11 @@
+{
+  "name": "moodle-editor_webvi-editor",
+  "builds": {
+    "moodle-editor_webvi-editor": {
+      "jsfiles": [
+        "webvi.js",
+        "editor.js"
+      ]
+    }
+  }
+}
