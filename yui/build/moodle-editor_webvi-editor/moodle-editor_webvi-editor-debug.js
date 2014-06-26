@@ -18,13 +18,12 @@ YUI.add('moodle-editor_webvi-editor', function (Y, NAME) {
  * Add a clone function to the array object to copy an array
  ******************************************************************************/
 Array.prototype.clone = function () {
-    var newArray = new Array();
+    var newArray = [];
     for (var property in this) {
-        newArray[property] = typeof (this[property]) == 'object' ? this[property].clone() : this[property]
+        newArray[property] = typeof (this[property]) === 'object' ? this[property].clone() : this[property];
     }
     return newArray;
-}
-
+};
 
 /*******************************************************************************
  * Globals
@@ -42,18 +41,18 @@ webvi_stateList = [];
  ******************************************************************************/
 function webvi_defaults() {
     var defaults = [];
-    defaults["backgroundColor"] = "rgb(90,90,90)";
-    defaults["statusBackgroundColor"] = "rgb(30,30,30)";
-    defaults["borderColor"] = "rgb(0,0,0)";
-    defaults["borderWidth"] = 3;
-    defaults["paddingWidth"] = 3;
-    defaults["textColor"] = "rgb(255,255,255)";
-    defaults["statusTextColor"] = "rgb(255,255,255)";
-    defaults["editCursorColor"] = "rgb(180,180,255)";
-    defaults["eolCursorColor"] = "rgb(255,255,180)";
-    defaults["visualCursorColor"] = "rgb(180,255,180)";
-    defaults["lineWrapColor"] = "rgb(255,255,0)";
-    defaults["font"] = "12px monospace";
+    defaults.backgroundColor = "rgb(90,90,90)";
+    defaults.statusBackgroundColor = "rgb(30,30,30)";
+    defaults.borderColor = "rgb(0,0,0)";
+    defaults.borderWidth = 3;
+    defaults.paddingWidth = 3;
+    defaults.textColor = "rgb(255,255,255)";
+    defaults.statusTextColor = "rgb(255,255,255)";
+    defaults.editCursorColor = "rgb(180,180,255)";
+    defaults.eolCursorColor = "rgb(255,255,180)";
+    defaults.visualCursorColor = "rgb(180,255,180)";
+    defaults.lineWrapColor = "rgb(255,255,0)";
+    defaults.font = "12px monospace";
 
     return defaults;
 }
@@ -73,25 +72,29 @@ webvi_VISUALMODE = 2;
  ******************************************************************************/
 function webvi_validateCursorPosition(state) {
     state.currentTextBuffer = state.currentTextBuffer.replace("\r\n", "\n");
-    if (state.currentTextBuffer.charAt(state.currentTextBuffer.length - 1) != "\n") {
+    if (state.currentTextBuffer.charAt(state.currentTextBuffer.length - 1) !== "\n") {
         state.currentTextBuffer += "\n";
         state.hiddenInput.value = state.currentTextBuffer;
     }
-    // not real good to do this all the time.
+    // Not real good to do this all the time.
     lines = state.currentTextBuffer.split("\n");
 
 
-    if (state.cursorPosition.y >= lines.length - 1)
+    if (state.cursorPosition.y >= lines.length - 1) {
         state.cursorPosition.y = lines.length - 2;
+    }
 
-    if (state.cursorPosition.y < 0)
+    if (state.cursorPosition.y < 0) {
         state.cursorPosition.y = 0;
+    }
 
-    if (state.cursorPosition.x > lines[state.cursorPosition.y].length)
+    if (state.cursorPosition.x > lines[state.cursorPosition.y].length) {
         state.cursorPosition.x = lines[state.cursorPosition.y].length;
+    }
 
-    if (state.cursorPosition.x < 0)
+    if (state.cursorPosition.x < 0) {
         state.cursorPosition.x = 0;
+    }
 
     webvi_fillDisplayBuffer(state);
 }
@@ -145,7 +148,7 @@ function webvi_moveCursorLeft(state) {
  ******************************************************************************/
 function webvi_moveCursorEndOfLine(state) {
     state.currentTextBuffer = state.currentTextBuffer.replace("\r\n", "\n");
-    // not real good to do this all the time.
+    // Not real good to do this all the time.
     lines = state.currentTextBuffer.split("\n");
 
     state.cursorPosition.x = lines[state.cursorPosition.y].length;
@@ -168,9 +171,10 @@ function webvi_moveCursorStartOfLine(state, skipWhitespace) {
     state.cursorPosition.x = 0;
 
     if (skipWhitespace) {
-        // skip over white space a the beginning
-        while (state.cursorPosition.x < lines[state.cursorPosition.y].length && lines[state.cursorPosition.y].charAt(state.cursorPosition.x) == ' ')
+        // Skip over white space a the beginning.
+        while (state.cursorPosition.x < lines[state.cursorPosition.y].length && lines[state.cursorPosition.y].charAt(state.cursorPosition.x) === ' ') {
             state.cursorPosition.x++;
+        }
     }
     webvi_validateCursorPosition(state);
 }
@@ -249,12 +253,12 @@ function webvi_moveCursorLeftWithWrap(state) {
 
     state.cursorPosition.x--;
     if (state.cursorPosition.x < 0) {
-        // wrap on new line and eof
+        // Wrap on new line and eof.
         state.cursorPosition.y--;
         if (state.cursorPosition.y < 0) {
             state.cursorPosition.y = lines.length - 1;
         }
-        state.cursorPosition.x = webvi_countLineLength(state.cursorPosition.y);
+        state.cursorPosition.x = webvi_countLineLength(state.cursorPosition.y, state);
     }
     webvi_validateCursorPosition(state);
 }
@@ -271,8 +275,8 @@ function webvi_moveCursorRightWithWrap(state) {
     lines = state.currentTextBuffer.split("\n");
 
     state.cursorPosition.x++;
-    if (state.cursorPosition.x == (lines[state.cursorPosition.y].length + 1)) {
-        // wrap on new line and eof
+    if (state.cursorPosition.x === (lines[state.cursorPosition.y].length + 1)) {
+        // Wrap on new line and eof.
         state.cursorPosition.x = 0;
         state.cursorPosition.y = (state.cursorPosition.y + 1) % lines.length;
     }
@@ -377,9 +381,10 @@ function webvi_fsmTransition(acceptRule, nextState, action) {
  ******************************************************************************/
 function webvi_readRepeatCount(state) {
     var buf = state.repeatBuffer;
-    if (buf == "")
+    if (buf === "") {
         buf = "0";
-    var repeatCount = parseInt(buf);
+    }
+    var repeatCount = parseInt(buf, 10);
     if (repeatCount <= 0) {
         repeatCount = 1;
     }
@@ -418,7 +423,7 @@ function webvi_simpleNavigation(input, state) {
             while (repeat-- > 0) { webvi_moveCursorToNextWordBoundary(state); }
             break;
         case 'G':
-            if (state.repeatBuffer == "") {
+            if (state.repeatBuffer === "") {
                 webvi_moveCursorToLastLine(state);
             } else {
                 webvi_moveCursorToLine(repeat - 1, state);
@@ -452,9 +457,9 @@ function webvi_runSearch(search, state) {
 
         var matchIndex = -1;
 
-        if (search.charAt(0) == '/') {
+        if (search.charAt(0) === '/') {
             matchIndex = searchBuffer.search(searchRe);
-        } else if (search.charAt(0) == '?') {
+        } else if (search.charAt(0) === '?') {
             for (var i = 0; i < searchBuffer.length; i++) {
                 matchIndex = searchBuffer.slice(searchBuffer.length - 1 - i).search(searchRe);
                 if (matchIndex >= 0) {
@@ -471,7 +476,7 @@ function webvi_runSearch(search, state) {
         }
 
         while (matchIndex-- >= 0) {
-            // slow - should set a flag to only update display once at end
+            // Slow - should set a flag to only update display once at end.
 
             webvi_moveCursorRightWithWrap(state);
         }
@@ -493,7 +498,7 @@ function webvi_capitalise(state) {
         var bufferIndex = webvi_findTextBufferIndex(state);
 
         var c = state.currentTextBuffer.charAt(bufferIndex);
-        if (c == c.toUpperCase()) {
+        if (c === c.toUpperCase()) {
             c = c.toLowerCase();
         } else {
             c = c.toUpperCase();
@@ -602,22 +607,24 @@ function webvi_cutRange(pos1, pos2, state) {
     var bufferIndex = webvi_findTextBufferPositionIndex(pos1, state);
     var bufferEndIndex = webvi_findTextBufferPositionIndex(pos2, state);
     var cursorIndex = webvi_findTextBufferIndex(state);
+    var i;
+    var tmpS;
 
     webvi_appendUndoBuffer(state);
     if (bufferIndex < bufferEndIndex) {
-        for (var i = 0; i < cursorIndex - bufferIndex; i++) {
+        for (i = 0; i < cursorIndex - bufferIndex; i++) {
             webvi_moveCursorLeftWithWrap(state);
         }
         state.copyBuffer = state.currentTextBuffer.slice(bufferIndex, bufferEndIndex);
-        var tmpS = state.currentTextBuffer.slice(0, bufferIndex) + state.currentTextBuffer.slice(bufferEndIndex);
+        tmpS = state.currentTextBuffer.slice(0, bufferIndex) + state.currentTextBuffer.slice(bufferEndIndex);
         state.currentTextBuffer = tmpS;
         state.statusText = "Cut " + (bufferEndIndex - bufferIndex) + " character(s).";
     } else {
-        for (var i = 0; i < cursorIndex - bufferEndIndex; i++) {
+        for (i = 0; i < cursorIndex - bufferEndIndex; i++) {
             webvi_moveCursorLeftWithWrap(state);
         }
         state.copyBuffer = state.currentTextBuffer.slice(bufferEndIndex, bufferIndex);
-        var tmpS = state.currentTextBuffer.slice(0, bufferEndIndex) + state.currentTextBuffer.slice(bufferIndex);
+        tmpS = state.currentTextBuffer.slice(0, bufferEndIndex) + state.currentTextBuffer.slice(bufferIndex);
         state.currentTextBuffer = tmpS;
         state.statusText = "Cut " + (bufferIndex - bufferEndIndex) + " character(s).";
     }
@@ -688,7 +695,7 @@ function webvi_join(state) {
     while (repeat-- > 0) {
         webvi_moveCursorEndOfLine(state);
         var bufferIndex = webvi_findTextBufferIndex(state);
-        if (state.currentTextBuffer[bufferIndex + 1] == "\n") {
+        if (state.currentTextBuffer[bufferIndex + 1] === "\n") {
             var tmpS = state.currentTextBuffer.slice(0, bufferIndex + 1) + state.currentTextBuffer.slice(bufferIndex + 2);
             state.currentTextBuffer = tmpS;
         }
@@ -739,6 +746,12 @@ function webvi_redo(state) {
  ******************************************************************************/
 function webvi_countLineLength(line, state) {
     var lines = state.currentTextBuffer.split("\n");
+    if (line < 0) {
+        line = 0;
+    }
+    if (line >= lines.length) {
+        line = lines.length - 1;
+    }
     return lines[line].length;
 }
 
@@ -750,7 +763,7 @@ function webvi_countLineLength(line, state) {
  * @param none
  ******************************************************************************/
 function webvi_buildVisualModeFSM() {
-    // valid visual mode commands are:
+    // Valid visual mode commands are:
     //
     // Copy
     // y<optional num><navigation/y>
@@ -860,9 +873,9 @@ function webvi_buildVisualModeFSM() {
     t = new webvi_fsmTransition(/y/,
                                 yankEndState,
                                 function(input, state) {
-                                    // copy the specified number of lines to the copyBuffer
-                                    var cursorPos = new Object();
-                                    var startCursorPos = new Object();
+                                    // Copy the specified number of lines to the copyBuffer.
+                                    var cursorPos = {};
+                                    var startCursorPos = {};
                                     var repeatCount = webvi_readRepeatCount(state);
                                     startCursorPos.x = 0;
                                     startCursorPos.y = state.cursorPosition.y;
@@ -873,17 +886,17 @@ function webvi_buildVisualModeFSM() {
 
     yankStartState.transitions.push(t);
 
-    // single char navigation commands (yank)
-    t = new webvi_fsmTransition(/[hjkl^$Gw%]/,
+    // Single char navigation commands (yank)
+    t = new webvi_fsmTransition(/[hjkl\^$Gw%]/,
                                 yankEndState,
                                 function(input, state) {
-                                    // copy the current cursor position
-                                    var cursorPos = new Object();
+                                    // Copy the current cursor position.
+                                    var cursorPos = {};
                                     cursorPos.x = state.cursorPosition.x;
                                     cursorPos.y = state.cursorPosition.y;
-                                    // move the cursor
+                                    // Move the cursor.
                                     webvi_simpleNavigation(input, state);
-                                    // copy the text we moved over
+                                    // Copy the text we moved over.
                                     webvi_copyRange(cursorPos, state.cursorPosition, state);
                                 });
 
@@ -908,9 +921,9 @@ function webvi_buildVisualModeFSM() {
     t = new webvi_fsmTransition(/[d]/,
                                 deleteEndState,
                                 function(input, state) {
-                                    // copy the specified number of lines to the copyBuffer
-                                    var cursorPos = new Object();
-                                    var startCursorPos = new Object();
+                                    // Copy the specified number of lines to the copyBuffer.
+                                    var cursorPos = {};
+                                    var startCursorPos = {};
                                     var repeatCount = webvi_readRepeatCount(state);
                                     startCursorPos.x = 0;
                                     startCursorPos.y = state.cursorPosition.y;
@@ -921,17 +934,17 @@ function webvi_buildVisualModeFSM() {
 
     deleteStartState.transitions.push(t);
 
-    // single char navigation commands (delete)
-    t = new webvi_fsmTransition(/[hjkl^$Gw%]/,
+    // Single char navigation commands (delete).
+    t = new webvi_fsmTransition(/[hjkl\^$Gw%]/,
                                 deleteEndState,
                                 function(input, state) {
-                                    // copy the current cursor position
-                                    var cursorPos = new Object();
+                                    // Copy the current cursor position.
+                                    var cursorPos = {};
                                     cursorPos.x = state.cursorPosition.x;
                                     cursorPos.y = state.cursorPosition.y;
-                                    // move the cursor
+                                    // Move the cursor.
                                     webvi_simpleNavigation(input, state);
-                                    // copy the text we moved over
+                                    // Copy the text we moved over.
                                     webvi_cutRange(cursorPos, state.cursorPosition, state);
                                 });
 
@@ -956,9 +969,9 @@ function webvi_buildVisualModeFSM() {
     t = new webvi_fsmTransition(/[c]/,
                                 cutEndState,
                                 function(input, state) {
-                                    // copy the specified number of lines to the copyBuffer
-                                    var cursorPos = new Object();
-                                    var startCursorPos = new Object();
+                                    // Copy the specified number of lines to the copyBuffer.
+                                    var cursorPos = {};
+                                    var startCursorPos = {};
                                     var repeatCount = webvi_readRepeatCount(state);
                                     startCursorPos.x = 0;
                                     startCursorPos.y = state.cursorPosition.y;
@@ -974,17 +987,17 @@ function webvi_buildVisualModeFSM() {
 
     cutStartState.transitions.push(t);
 
-    // single char navigation commands (cut)
-    t = new webvi_fsmTransition(/[hjkl^$Gw%]/,
+    // Single char navigation commands (cut).
+    t = new webvi_fsmTransition(/[hjkl\^$Gw%]/,
                                 cutEndState,
                                 function(input, state) {
-                                    // copy the current cursor position
-                                    var cursorPos = new Object();
+                                    // Copy the current cursor position.
+                                    var cursorPos = {};
                                     cursorPos.x = state.cursorPosition.x;
                                     cursorPos.y = state.cursorPosition.y;
-                                    // move the cursor
+                                    // Move the cursor.
                                     webvi_simpleNavigation(input, state);
-                                    // copy the text we moved over
+                                    // Copy the text we moved over.
                                     webvi_cutRange(cursorPos, state.cursorPosition, state);
                                     state.mode = webvi_EDITMODE;
                                     state.isSimpleInsert = true;
@@ -996,11 +1009,11 @@ function webvi_buildVisualModeFSM() {
 
 
     endState = new webvi_fsmState(webvi_FSMSTATEEND, "end");
-    // single char navigation commands
-    t = new webvi_fsmTransition(/[hjkl^$Gw%]/,
+    // Single char navigation commands.
+    t = new webvi_fsmTransition(/[hjkl\^$Gw%]/,
                                 endState,
                                 function(input, state) {
-                                    // move the cursor
+                                    // Move the cursor.
                                     webvi_simpleNavigation(input, state);
                                 });
 
@@ -1012,11 +1025,11 @@ function webvi_buildVisualModeFSM() {
 
     startState.transitions.push(t);
 
-    // delete immediate
+    // Delete immediate.
     t = new webvi_fsmTransition(/x/,
                                 endState,
                                 function(input, state) {
-                                    var cursorPos = new Object();
+                                    var cursorPos = {};
                                     var repeatCount = webvi_readRepeatCount(state);
                                     cursorPos.x = state.cursorPosition.x+repeatCount;
                                     cursorPos.y = state.cursorPosition.y;
@@ -1025,7 +1038,7 @@ function webvi_buildVisualModeFSM() {
 
     startState.transitions.push(t);
 
-    // replace
+    // Replace.
     replaceStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "replace-start");
 
     t = new webvi_fsmTransition(/r/,
@@ -1039,7 +1052,7 @@ function webvi_buildVisualModeFSM() {
     t = new webvi_fsmTransition(/./,
                                 replaceEndState,
                                 function(input, state) {
-                                    var cursorPos = new Object();
+                                    var cursorPos = {};
                                     var repeatCount = webvi_readRepeatCount(state);
                                     cursorPos.x = state.cursorPosition.x+repeatCount;
                                     cursorPos.y = state.cursorPosition.y;
@@ -1057,7 +1070,7 @@ function webvi_buildVisualModeFSM() {
                                     if (input == "a") {
                                         webvi_moveCursorRight(state);
                                     }
-                                    webvi_appendUndoBuffer(state)
+                                    webvi_appendUndoBuffer(state);
                                     state.mode = webvi_EDITMODE;
                                     state.isSimpleInsert = true;
                                     state.simpleInsertBuffer = "";
@@ -1115,7 +1128,7 @@ function webvi_buildVisualModeFSM() {
     t = new webvi_fsmTransition(/o/,
                                 oEndState,
                                 function(input, state) {
-                                    webvi_appendUndoBuffer(state)
+                                    webvi_appendUndoBuffer(state);
                                     webvi_moveCursorDown(state);
                                     webvi_moveCursorStartOfLine(state, false);
                                     state.mode = webvi_EDITMODE;
@@ -1180,14 +1193,14 @@ function webvi_executeFSM(fsm, command, state) {
         foundTransition = false;
         for (var j = 0; j < current.transitions.length && !foundTransition; j++) {
             if (current.transitions[j].acceptRule.test(command.charAt(i))) {
-                // found a valid transition
+                // Found a valid transition.
                 foundTransition = true;
                 current.transitions[j].action(command.charAt(i), state);
                 current = current.transitions[j].nextState;
                 continue;
             }
         }
-        // no matching transition - go to error
+        // No matching transition - go to error.
         if (!foundTransition) {
             return new webvi_fsmState(webvi_FSMSTATEERROR, "error");
         }
@@ -1207,7 +1220,7 @@ function webvi_executeFSM(fsm, command, state) {
  ******************************************************************************/
 function webvi_executeVisualModeCommandBuffer(state) {
 
-    // if the buffer does not begin with a valid starting char, clear the buffer
+    // If the buffer does not begin with a valid starting char, clear the buffer
     // and start again.
 
     fsm = webvi_buildVisualModeFSM();
@@ -1252,7 +1265,7 @@ function webvi_interpretKeyPress(e) {
     var c = "";
 
     var i = e.keyCode;
-    if (i == 0) {
+    if (i === 0) {
         i = e.charCode;
     }
 
@@ -1401,8 +1414,8 @@ function webvi_handleKeyboardInput(e, state) {
 
     switch (state.mode) {
         case webvi_VISUALMODE:
-            if (code != "") {
-                if (code == 'r' && e.ctrlKey) {
+            if (code !== "") {
+                if (code === 'r' && e.ctrlKey) {
                     code = 'R';
                 }
                 webvi_appendVisualModeCommandChar(code, state);
@@ -1429,7 +1442,7 @@ function webvi_handleKeyboardInput(e, state) {
             }
             break;
         case webvi_EDITMODE:
-            if (code != "") {
+            if (code !== "") {
                 webvi_insertTextRaw(code, state);
             } else if (e.keyCode > 0) {
                 switch (e.keyCode) {
@@ -1478,7 +1491,7 @@ function webvi_handleKeyboardInput(e, state) {
             }
             break;
         case webvi_COMMANDMODE:
-            if (code != "") {
+            if (code !== "") {
                 state.commandBuffer += code;
             } else if (e.keyCode > 0) {
                 switch (e.keyCode) {
@@ -1520,7 +1533,7 @@ function webvi_handleKeyboardInput(e, state) {
  *
  ******************************************************************************/
 function webvi_handleDocumentKeyboardInput(e) {
-    // get the target
+    // Get the target.
     for (var i = 0; i < webvi_stateList.length; i++) {
         if (webvi_stateList[i].canvasNode == e.target) {
             webvi_handleKeyboardInput(e, state);
@@ -1545,7 +1558,7 @@ function webvi_fillDisplayBuffer(state) {
     var lines = state.currentTextBuffer.split("\n");
     var x = 0, y = 0;
 
-    // clear the buffer
+    // Clear the buffer.
     for (var j = 0; j < state.windowSize.height; j++) {
         state.lineWrap[j] = false;
         for (var i = 0; i < state.windowSize.width; i++) {
@@ -1555,22 +1568,22 @@ function webvi_fillDisplayBuffer(state) {
 
     var line = 0;
     var cursorValid = false;
-    // fill the buffer from the text buffer
+    // Fill the buffer from the text buffer.
     for (line = 0; line < lines.length && y < state.windowSize.height; line++) {
         for (x = 0; x < lines[line].length; x++) {
-            if (x > 0 && ((x % state.windowSize.width) == 0)) {
+            if (x > 0 && ((x % state.windowSize.width) === 0)) {
                 state.lineWrap[y] = true;
                 y++;
             }
             state.displayBuffer[x % state.windowSize.width][y] = lines[line][x];
-            if (line == state.cursorPosition.y && x == state.cursorPosition.x) {
+            if (line === state.cursorPosition.y && x === state.cursorPosition.x) {
                 state.displayCursorPosition.x = x % state.windowSize.width;
                 state.displayCursorPosition.y = y;
                 cursorValid = true;
             }
         }
         state.displayBuffer[x % state.windowSize.width][y] = '\n';
-        if (line == state.cursorPosition.y && x == state.cursorPosition.x) {
+        if (line === state.cursorPosition.y && x === state.cursorPosition.x) {
             state.displayCursorPosition.x = x % state.windowSize.width;
             state.displayCursorPosition.y = y;
             cursorValid = true;
@@ -1596,13 +1609,13 @@ function webvi_state(hiddenInput, canvasNode, textareaNode) {
     this.canvasNode = canvasNode;
     this.options = new webvi_defaults();
     this.currentTextBuffer = hiddenInput.value;
-    this.cursorPosition = new Object();
+    this.cursorPosition = {};
     this.cursorPosition.x = 0;
     this.cursorPosition.y = 0;
-    this.displayCursorPosition = new Object();
+    this.displayCursorPosition = {};
     this.displayCursorPosition.x = 0;
     this.displayCursorPosition.y = 0;
-    this.windowSize = new Object();
+    this.windowSize = {};
     this.windowSize.width = textareaNode.getAttribute("cols");
     this.windowSize.height = textareaNode.getAttribute("rows") - 1;
     this.mode = webvi_VISUALMODE;
@@ -1610,9 +1623,9 @@ function webvi_state(hiddenInput, canvasNode, textareaNode) {
     this.copyBuffer = "";
     this.lastSearch = "";
     this.repeatBuffer = "";
-    this.characterSize = new Object();
-    this.characterSize.width = (canvasNode.getAttribute("width") - (this.options["borderWidth"] * 2) - (this.options["paddingWidth"] * 2)) / this.windowSize.width;
-    this.characterSize.height = (canvasNode.getAttribute("height") - (this.options["borderWidth"] * 2) - (this.options["paddingWidth"] * 2)) / (this.windowSize.height + 1);
+    this.characterSize = {};
+    this.characterSize.width = (canvasNode.getAttribute("width") - (this.options.borderWidth * 2) - (this.options.paddingWidth * 2)) / this.windowSize.width;
+    this.characterSize.height = (canvasNode.getAttribute("height") - (this.options.borderWidth * 2) - (this.options.paddingWidth * 2)) / (this.windowSize.height + 1);
     this.statusText = "Ready: " + this.currentTextBuffer.split("\n").length + "L, " + this.currentTextBuffer.length + "C";
     this.undoBuffer = [];
     this.redoBuffer = [];
@@ -1653,54 +1666,54 @@ function webvi_bootstrap() {
  ******************************************************************************/
 function webvi_renderCanvas(state) {
     context = state.canvasNode.getContext('2d');
-    context.fillStyle = state.options["borderColor"];
+    context.fillStyle = state.options.borderColor;
     context.fillRect(0, 0, state.canvasNode.width, state.canvasNode.height);
-    context.fillStyle = state.options["backgroundColor"];
-    context.fillRect(state.options["borderWidth"], state.options["borderWidth"], state.canvasNode.width-(state.options["borderWidth"] * 2), state.canvasNode.height-(state.options["borderWidth"] * 2));
-    context.font = state.options["font"];
-    context.fillStyle = state.options["textColor"];
+    context.fillStyle = state.options.backgroundColor;
+    context.fillRect(state.options.borderWidth, state.options.borderWidth, state.canvasNode.width-(state.options.borderWidth * 2), state.canvasNode.height-(state.options.borderWidth * 2));
+    context.font = state.options.font;
+    context.fillStyle = state.options.textColor;
 
     for (var y = 0; y < state.windowSize.height; y++) {
         for (var x = 0; x < state.windowSize.width; x++) {
             if (x == state.displayCursorPosition.x && y == state.displayCursorPosition.y && state.mode != webvi_COMMANDMODE) {
-                // draw the cursor with the text inverted
+                // Draw the cursor with the text inverted.
                 if (state.displayBuffer[x][y] == '\n') {
-                    context.fillStyle = state.options["eolCursorColor"];
+                    context.fillStyle = state.options.eolCursorColor;
                 } else if (state.mode == webvi_VISUALMODE) {
-                    context.fillStyle = state.options["visualCursorColor"];
+                    context.fillStyle = state.options.visualCursorColor;
                 } else if (state.mode == webvi_EDITMODE) {
-                    context.fillStyle = state.options["editCursorColor"];
+                    context.fillStyle = state.options.editCursorColor;
                 }
-                context.fillRect(state.characterSize.width * x + state.options["borderWidth"] + state.options["paddingWidth"],
-                                    state.characterSize.height * y + state.options["borderWidth"] + state.options["paddingWidth"] + 4,
+                context.fillRect(state.characterSize.width * x + state.options.borderWidth + state.options.paddingWidth,
+                                    state.characterSize.height * y + state.options.borderWidth + state.options.paddingWidth + 4,
                                     state.characterSize.width,
                                      state.characterSize.height);
-                context.fillStyle = state.options["backgroundColor"];
-                context.fillText(state.displayBuffer[x][y], state.characterSize.width * x + state.options["borderWidth"] + state.options["paddingWidth"], state.characterSize.height * (y + 1) + state.options["borderWidth"] + state.options["paddingWidth"]);
-                context.fillStyle = state.options["textColor"];
+                context.fillStyle = state.options.backgroundColor;
+                context.fillText(state.displayBuffer[x][y], state.characterSize.width * x + state.options.borderWidth + state.options.paddingWidth, state.characterSize.height * (y + 1) + state.options.borderWidth + state.options.paddingWidth);
+                context.fillStyle = state.options.textColor;
             } else {
-                context.fillText(state.displayBuffer[x][y], state.characterSize.width * x + state.options["borderWidth"] + state.options["paddingWidth"], state.characterSize.height * (y + 1) + state.options["borderWidth"] + state.options["paddingWidth"]);
+                context.fillText(state.displayBuffer[x][y], state.characterSize.width * x + state.options.borderWidth + state.options.paddingWidth, state.characterSize.height * (y + 1) + state.options.borderWidth + state.options.paddingWidth);
             }
         }
-        // draw a wrap indicator at the end of a line to indicate wrapping.
-        if (state.lineWrap[y] == true) {
-            context.strokeStyle = state.options["lineWrapColor"];
-            context.lineWidth = state.options["borderWidth"];
+        // Draw a wrap indicator at the end of a line to indicate wrapping.
+        if (state.lineWrap[y] === true) {
+            context.strokeStyle = state.options.lineWrapColor;
+            context.lineWidth = state.options.borderWidth;
             context.beginPath();
-            context.moveTo(state.canvasNode.width - (state.options["borderWidth"]/2), state.characterSize.height * (y) + state.options["borderWidth"] + state.options["paddingWidth"] + 4);
-            context.lineTo(state.canvasNode.width - (state.options["borderWidth"]/2), state.characterSize.height * (y + 1) + state.options["borderWidth"] + state.options["paddingWidth"] + 1);
+            context.moveTo(state.canvasNode.width - (state.options.borderWidth/2), state.characterSize.height * (y) + state.options.borderWidth + state.options.paddingWidth + 4);
+            context.lineTo(state.canvasNode.width - (state.options.borderWidth/2), state.characterSize.height * (y + 1) + state.options.borderWidth + state.options.paddingWidth + 1);
             context.stroke();
         }
     }
 
-    // draw the status message
-    context.fillStyle = state.options["statusBackgroundColor"];
-    context.fillRect(state.options["borderWidth"], state.canvasNode.height - state.options["borderWidth"] - state.characterSize.height, state.canvasNode.width-(state.options["borderWidth"] * 2), state.characterSize.height);
-    context.fillStyle = state.options["statusTextColor"];
-    if (state.mode == webvi_COMMANDMODE) {
-        context.fillText(state.commandBuffer, state.options["borderWidth"] + state.options["paddingWidth"], state.canvasNode.height - state.options["borderWidth"] - state.options["paddingWidth"]);
+    // Draw the status message.
+    context.fillStyle = state.options.statusBackgroundColor;
+    context.fillRect(state.options.borderWidth, state.canvasNode.height - state.options.borderWidth - state.characterSize.height, state.canvasNode.width-(state.options.borderWidth * 2), state.characterSize.height);
+    context.fillStyle = state.options.statusTextColor;
+    if (state.mode === webvi_COMMANDMODE) {
+        context.fillText(state.commandBuffer, state.options.borderWidth + state.options.paddingWidth, state.canvasNode.height - state.options.borderWidth - state.options.paddingWidth);
     } else {
-        context.fillText(state.statusText, state.options["borderWidth"] + state.options["paddingWidth"], state.canvasNode.height - state.options["borderWidth"] - state.options["paddingWidth"]);
+        context.fillText(state.statusText, state.options.borderWidth + state.options.paddingWidth, state.canvasNode.height - state.options.borderWidth - state.options.paddingWidth);
     }
 }
 
@@ -1791,16 +1804,16 @@ function webvi_init(elementid) {
     state = new webvi_state(hiddenInput, canvas, textareaNode);
     webvi_stateList.push(state);
     webvi_renderCanvas(state);
-    // register a keyboard listener for this canvas
+    // Register a keyboard listener for this canvas.
     canvas.addEventListener('keydown', webvi_handleDocumentKeyboardInput, false);
-
 }
+
 M.editor_webvi = M.editor_webvi || {
 
     init : function(elementid) {
         Y.log(elementid);
         webvi_init(elementid);
-    },
+    }
 
 
 };

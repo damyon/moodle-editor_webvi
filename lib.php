@@ -80,7 +80,7 @@ class webvi_texteditor extends texteditor {
 
         $PAGE->requires->yui_module('moodle-editor_webvi-editor',
                                     'M.editor_webvi.init',
-                                    array($elementid), true);
+                                    array($elementid));
 
     }
 
