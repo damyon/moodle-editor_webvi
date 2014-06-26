@@ -18,15 +18,14 @@
  * Content editable text editor integration version file.
  *
  * @package    editor_webvi
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @author Damyon Wiese <damyon@moodle.com>
+ * @copyright  2014 Damyon Wiese
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2013070400;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2013050100;        // Requires this Moodle version
-$plugin->component = 'editor_webvi';  // Full name of the plugin (used for diagnostics)
+$plugin->version   = 2013070400;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2013050100;        // Requires this Moodle version.
+$plugin->component = 'editor_webvi';  // Full name of the plugin (used for diagnostics).
 $plugin->maturity  = MATURITY_ALPHA;
 $plugin->release  = 2013070400;

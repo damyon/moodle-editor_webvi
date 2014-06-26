@@ -18,8 +18,7 @@
  * webvi moodle text editor
  *
  * @package    editor_webvi
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @author     Damyon Wiese <damyon@moodle.com>
+ * @copyright  2014 Damyon Wiese
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

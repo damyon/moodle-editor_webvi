@@ -15,15 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'editor_tinymce', language 'en'.
+ * Strings for component 'editor_webvi', language 'en'.
  *
- * Note: use editor/tinymce/extra/tools/update_lang_files.php script to import strings from upstream JS lang files.
- *
- * @package    editor_tinymce
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @package    editor_webvi
+ * @copyright  2014 Damyon Wiese
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-//== Custom Moodle strings that are not part of upstream TinyMCE ==
 $string['pluginname'] = 'Vi like editor';
