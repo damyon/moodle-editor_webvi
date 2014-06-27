@@ -77,7 +77,6 @@ function webvi_validateCursorPosition(state) {
     // Not real good to do this all the time.
     lines = state.currentTextBuffer.split("\n");
 
-
     if (state.cursorPosition.y >= lines.length - 1) {
         state.cursorPosition.y = lines.length - 2;
     }
@@ -1567,7 +1566,7 @@ function webvi_fillDisplayBuffer(state) {
     var line = 0;
     var cursorValid = false;
     // Fill the buffer from the text buffer.
-    for (line = 0; line < lines.length && y < state.windowSize.height; line++) {
+    for (line = state.scrollPosition; (line < lines.length) && (y < state.windowSize.height); line++) {
         for (x = 0; x < lines[line].length; x++) {
             if (x > 0 && ((x % state.windowSize.width) === 0)) {
                 state.lineWrap[y] = true;
@@ -1590,8 +1589,17 @@ function webvi_fillDisplayBuffer(state) {
         y++;
     }
     if (!cursorValid) {
-        state.displayCursorPosition.x = (x) % state.windowSize.width;
-        state.displayCursorPosition.y = (y-1);
+        // This is where to fix the scrollPosition.
+        // Scroll up if required.
+        if (state.cursorPosition.y < state.scrollPosition) {
+            state.scrollPosition = state.cursorPosition.y;
+        } else {
+            // We must need to scroll down.
+            state.scrollPosition++;
+        }
+        // This is a slow way to scroll down.
+        webvi_fillDisplayBuffer(state);
+
     }
 
 }
@@ -1610,6 +1618,7 @@ function webvi_state(hiddenInput, canvasNode, textareaNode) {
     this.cursorPosition = {};
     this.cursorPosition.x = 0;
     this.cursorPosition.y = 0;
+    this.scrollPosition = 0;
     this.displayCursorPosition = {};
     this.displayCursorPosition.x = 0;
     this.displayCursorPosition.y = 0;
