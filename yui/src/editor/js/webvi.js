@@ -387,6 +387,23 @@ function webvi_readRepeatCount(state) {
     }
     return repeatCount;
 }
+/*******************************************************************************
+ * webvi_gotoMark...
+ *
+ * Move the cursor to a saved mark.
+ *
+ * @param input, state
+ ******************************************************************************/
+function webvi_gotoMark(input, state) {
+    if (typeof state.markPositions[input] !== "undefined") {
+        state.statusText = "Go to mark: " + input;
+        state.cursorPosition.x = state.markPositions[input].x;
+        state.cursorPosition.y = state.markPositions[input].y;
+        webvi_validateCursorPosition(state);
+    } else {
+        state.statusText = "Mark not set: " + input;
+    }
+}
 
 /*******************************************************************************
  * webvi_simpleNavigation...
@@ -899,6 +916,26 @@ function webvi_buildVisualModeFSM() {
 
     yankStartState.transitions.push(t);
 
+    // Multi char navigation command (mark buffer)
+    yankMarkNavigationStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "yank-mark-navigation-start");
+    t = new webvi_fsmTransition(/'/,
+                                yankMarkNavigationStartState,
+                                function(input, state) { });
+    yankStartState.transitions.push(t);
+
+    t = new webvi_fsmTransition(/[a-z]/,
+                                yankEndState,
+                                function(input, state) {
+                                    var cursorPos = {};
+                                    cursorPos.x = state.cursorPosition.x;
+                                    cursorPos.y = state.cursorPosition.y;
+                                    // Move the cursor.
+                                    webvi_gotoMark(input, state);
+                                    // Copy the text we moved over.
+                                    webvi_copyRange(cursorPos, state.cursorPosition, state);
+                                });
+    yankMarkNavigationStartState.transitions.push(t);
+
     deleteStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "delete-start");
 
     t = new webvi_fsmTransition(/[d]/,
@@ -946,6 +983,25 @@ function webvi_buildVisualModeFSM() {
                                 });
 
     deleteStartState.transitions.push(t);
+    // Multi char navigation command (mark buffer)
+    deleteMarkNavigationStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "delete-mark-navigation-start");
+    t = new webvi_fsmTransition(/'/,
+                                deleteMarkNavigationStartState,
+                                function(input, state) { });
+    deleteStartState.transitions.push(t);
+
+    t = new webvi_fsmTransition(/[a-z]/,
+                                deleteEndState,
+                                function(input, state) {
+                                    var cursorPos = {};
+                                    cursorPos.x = state.cursorPosition.x;
+                                    cursorPos.y = state.cursorPosition.y;
+                                    // Move the cursor.
+                                    webvi_gotoMark(input, state);
+                                    // Copy the text we moved over.
+                                    webvi_cutRange(cursorPos, state.cursorPosition, state);
+                                });
+    deleteMarkNavigationStartState.transitions.push(t);
 
     cutStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "cut-start");
 
@@ -1004,6 +1060,29 @@ function webvi_buildVisualModeFSM() {
 
     cutStartState.transitions.push(t);
 
+    // Multi char navigation command (mark buffer)
+    cutMarkNavigationStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "cut-mark-navigation-start");
+    t = new webvi_fsmTransition(/'/,
+                                cutMarkNavigationStartState,
+                                function(input, state) { });
+    cutStartState.transitions.push(t);
+
+    t = new webvi_fsmTransition(/[a-z]/,
+                                cutEndState,
+                                function(input, state) {
+                                    var cursorPos = {};
+                                    cursorPos.x = state.cursorPosition.x;
+                                    cursorPos.y = state.cursorPosition.y;
+                                    // Move the cursor.
+                                    webvi_gotoMark(input, state);
+                                    // Copy the text we moved over.
+                                    webvi_cutRange(cursorPos, state.cursorPosition, state);
+                                    state.mode = webvi_EDITMODE;
+                                    state.isSimpleInsert = true;
+                                    state.simpleInsertBuffer = "";
+                                    state.statusText = "Insert Mode";
+                                });
+    cutMarkNavigationStartState.transitions.push(t);
 
     endState = new webvi_fsmState(webvi_FSMSTATEEND, "end");
     // Single char navigation commands.
@@ -1015,6 +1094,22 @@ function webvi_buildVisualModeFSM() {
                                 });
 
     startState.transitions.push(t);
+
+    // Multi char navigation command (mark buffer)
+    markNavigationStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "mark-navigation-start");
+    t = new webvi_fsmTransition(/'/,
+                                markNavigationStartState,
+                                function(input, state) { });
+    startState.transitions.push(t);
+
+    markNavigationEndState = new webvi_fsmState(webvi_FSMSTATEEND, "mark-navigation-end");
+    t = new webvi_fsmTransition(/[a-z]/,
+                                markNavigationEndState,
+                                function(input, state) {
+                                    // Move the cursor.
+                                    webvi_gotoMark(input, state);
+                                });
+    markNavigationStartState.transitions.push(t);
 
     t = new webvi_fsmTransition(/[0-9]/,
                                 startState,
@@ -1076,6 +1171,26 @@ function webvi_buildVisualModeFSM() {
 
     startState.transitions.push(t);
 
+    // Mark a-z.
+    markStartState = new webvi_fsmState(webvi_FSMSTATEMIDDLE, "mark-start");
+
+    t = new webvi_fsmTransition(/m/,
+                                markStartState,
+                                function(input, state) { });
+    startState.transitions.push(t);
+
+    markEndState = new webvi_fsmState(webvi_FSMSTATEEND, "mark-end");
+
+    t = new webvi_fsmTransition(/[a-z]/,
+                                markEndState,
+                                function(input, state) {
+                                    state.markPositions[input] = {};
+                                    state.markPositions[input].x = state.cursorPosition.x;
+                                    state.markPositions[input].y = state.cursorPosition.y;
+                                    state.statusText = "Mark position: " + input;
+                                });
+    markStartState.transitions.push(t);
+
     pasteEndState = new webvi_fsmState(webvi_FSMSTATEEND, "paste-end");
 
     t = new webvi_fsmTransition(/p/,
@@ -1126,10 +1241,10 @@ function webvi_buildVisualModeFSM() {
                                 oEndState,
                                 function(input, state) {
                                     webvi_appendUndoBuffer(state);
+                                    webvi_insertTextRaw("\n", state);
                                     webvi_moveCursorDown(state);
                                     webvi_moveCursorStartOfLine(state, false);
                                     state.mode = webvi_EDITMODE;
-                                    webvi_insertTextRaw("\n", state);
                                     state.isSimpleInsert = true;
                                     state.simpleInsertBuffer = "";
                                     state.statusText = "Insert Mode";
@@ -1636,6 +1751,7 @@ function webvi_state(hiddenInput, canvasNode, textareaNode) {
     this.statusText = "Ready: " + this.currentTextBuffer.split("\n").length + "L, " + this.currentTextBuffer.length + "C";
     this.undoBuffer = [];
     this.redoBuffer = [];
+    this.markPositions = [];
     this.simpleInsertBuffer = "";
     this.isSimpleInsert = true;
 
