@@ -1156,9 +1156,15 @@ function webvi_buildVisualModeFSM() {
 
     insertEndState = new webvi_fsmState(webvi_FSMSTATEEND, "insert-end");
 
-    t = new webvi_fsmTransition(/[ia]/,
+    t = new webvi_fsmTransition(/[iaAI]/,
                                 insertEndState,
                                 function(input, state) {
+                                    if (input == "I") {
+                                        webvi_moveCursorStartOfLine(state, false);
+                                    }
+                                    if (input == "A") {
+                                        webvi_moveCursorEndOfLine(state);
+                                    }
                                     if (input == "a") {
                                         webvi_moveCursorRight(state);
                                     }
@@ -1193,9 +1199,12 @@ function webvi_buildVisualModeFSM() {
 
     pasteEndState = new webvi_fsmState(webvi_FSMSTATEEND, "paste-end");
 
-    t = new webvi_fsmTransition(/p/,
+    t = new webvi_fsmTransition(/[pP]/,
                                 pasteEndState,
                                 function(input, state) {
+                                    if (input == "P") {
+                                        webvi_moveCursorLeft(state);
+                                    }
                                     if (state.copyBuffer.indexOf("\n") > 0) {
                                         state.cursorPosition.x = 0;
                                         state.cursorPosition.y++;
