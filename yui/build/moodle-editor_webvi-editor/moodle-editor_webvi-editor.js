@@ -1391,6 +1391,12 @@ function webvi_interpretKeyPress(e) {
     if (i === 0) {
         i = e.charCode;
     }
+    if (e.ctrlKey) {
+        console.log('control');
+        if (i == 86) {
+            return 'paste';
+        }
+    }
 
     if (e.shiftKey) {
         if (i >= 65 && i <= 90) {
@@ -1524,6 +1530,31 @@ function webvi_interpretKeyPress(e) {
 
 
 /*******************************************************************************
+ * webvi_handlePaste...
+ *
+ * Handle a paste event and insert the content at the current position.
+ *
+ * @param evt, state
+ * @return - bool
+ ******************************************************************************/
+function webvi_handlePaste(e, state) {
+    var sourceEvent = e.originalEvent || e;
+    var clipboard = sourceEvent.clipboardData;
+    var pastedText = '';
+    if (typeof clipboard != 'undefined') {
+        pastedText = clipboard.getData('text/plain');
+    }
+    if (!pastedText) {
+        pastedText = prompt('Paste text here...');
+    }
+
+    state.mode = webvi_EDITMODE;
+    webvi_insertTextRaw(pastedText, state);
+
+    webvi_renderCanvas(state);
+}
+
+/*******************************************************************************
  * webvi_handleKeyboardInput...
  *
  * Handle the keyboard input by updating the state and triggering a redraw.
@@ -1535,9 +1566,12 @@ function webvi_interpretKeyPress(e) {
 function webvi_handleKeyboardInput(e, state) {
     var code = webvi_interpretKeyPress(e);
 
+    console.log(code);
     switch (state.mode) {
         case webvi_VISUALMODE:
-            if (code !== "") {
+            if (code == 'paste') {
+                webvi_handlePaste(e, state);
+            } else if (code !== "") {
                 if (code === 'r' && e.ctrlKey) {
                     code = 'R';
                 }
@@ -1565,7 +1599,9 @@ function webvi_handleKeyboardInput(e, state) {
             }
             break;
         case webvi_EDITMODE:
-            if (code !== "") {
+            if (code == 'paste') {
+                webvi_handlePaste(e, state);
+            } else if (code !== "") {
                 webvi_insertTextRaw(code, state);
             } else if (e.keyCode > 0) {
                 switch (e.keyCode) {
