@@ -24,7 +24,7 @@ Vi is simply the best. It is a purely keyboard based text editor with separate "
 
 Visual Mode
 This is the mode that you will be in when the text editor opens. This mode lets you quickly navigate around your document
-and perform commands like copy/paste.
+and perform commands like copy/paste. You will need to click on the editor before it will respond to any keyboard commands.
 
 Visual Mode Commands
 Arrow keys: Move the cursor
