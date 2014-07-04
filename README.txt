@@ -8,9 +8,9 @@ PATHTOMOODLE/lib/editors/webvi
 
 Visit your site notifications page to install the new plugins.
 
-Enable the new editor type by default on the page:
+Enable the new editor type on the page:
 
 Site administration / ► Plugins / ► Text editors / ► Manage editors
 
-Also - change the order so this editor is the first in the list.
+Now anyone can choose it in their profile as their default editor.
 
