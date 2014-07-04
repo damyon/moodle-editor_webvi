@@ -74,8 +74,9 @@ function webvi_validateCursorPosition(state) {
     state.currentTextBuffer = state.currentTextBuffer.replace("\r\n", "\n");
     if (state.currentTextBuffer.charAt(state.currentTextBuffer.length - 1) !== "\n") {
         state.currentTextBuffer += "\n";
-        state.hiddenInput.value = state.currentTextBuffer;
     }
+    // Copy the text back to the form field.
+    state.hiddenInput.value = state.currentTextBuffer;
     // Not real good to do this all the time.
     lines = state.currentTextBuffer.split("\n");
 
@@ -1252,6 +1253,7 @@ function webvi_buildVisualModeFSM() {
                                 oEndState,
                                 function(input, state) {
                                     webvi_appendUndoBuffer(state);
+                                    webvi_moveCursorEndOfLine(state);
                                     webvi_insertTextRaw("\n", state);
                                     webvi_moveCursorDown(state);
                                     webvi_moveCursorStartOfLine(state, false);
