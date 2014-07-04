@@ -41,7 +41,10 @@ class webvi_texteditor extends texteditor {
      * @return array
      */
     public function get_supported_formats() {
-        return array(FORMAT_PLAIN => FORMAT_PLAIN, FORMAT_MOODLE => FORMAT_MOODLE, FORMAT_HTML => FORMAT_HTML);
+        return array(FORMAT_PLAIN => FORMAT_PLAIN,
+                     FORMAT_MOODLE => FORMAT_MOODLE,
+                     FORMAT_HTML => FORMAT_HTML,
+                     FORMAT_MARKDOWN => FORMAT_MARKDOWN);
     }
 
     /**
@@ -49,7 +52,7 @@ class webvi_texteditor extends texteditor {
      * @return int
      */
     public function get_preferred_format() {
-        return FORMAT_PLAIN;
+        return FORMAT_MARKDOWN;
     }
 
     /**
